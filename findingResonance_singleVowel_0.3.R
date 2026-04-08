@@ -74,33 +74,18 @@ for(token in tokens){
   y_max <- (F1 + BW1/2) * 1.1
   
   # --- Rebuild harmonic rectangles ---
-  # --- Rebuild harmonic rectangles ---
   rects <- tibble()
   for(k in 1:20){
     f <- f0 * k
     band_inner <- cents_to_hz(f, 25)
+    band_outer <- cents_to_hz(f, 50)
     
-    # horizontal rectangles span the whole F2 axis
     rects <- bind_rows(
       rects,
-      tibble(
-        xmin = 0,
-        xmax = 3000,            
-        ymin = band_inner[1],
-        ymax = band_inner[2],
-        fill = "green",
-        k = k
-      ),
-      # vertical rectangles span the whole F1 axis
-      tibble(
-        xmin = band_inner[1],
-        xmax = band_inner[2],
-        ymin = 0,  
-        ymax = 1500,
-        fill = "green",
-        k = k
-      )
-    )
+      tibble(xmin = F2_limits[2], xmax = F2_limits[1],
+             ymin = band_inner[1], ymax = band_inner[2], fill = "green", k = k),
+      tibble(xmin = band_inner[1], xmax = band_inner[2],
+             ymin = F1_limits[1], ymax = F1_limits[2], fill = "green", k = k))
   }
   
   # --- Determine most prominent harmonic ---

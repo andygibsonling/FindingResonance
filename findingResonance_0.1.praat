@@ -32,8 +32,8 @@ form Settings
 	button: "recordNew"
 	button: "openFile"
 	comment: "Drag the folder where the scripts are to this field:"
-	text base_dir /Users/andrewgibson/Documents/GitHub/FormantHarmonicAlignment/FindingResonance
-	text snd_dir /Users/andrewgibson/Documents/GitHub/FormantHarmonicAlignment/FindingResonance/example_hefele/
+	text base_dir /AddPathToYourFindingResonance_DownloadFolder
+	text snd_dir /AddPathToWavFiles_ifUsingPrerecordedAudio
 
 endform
 

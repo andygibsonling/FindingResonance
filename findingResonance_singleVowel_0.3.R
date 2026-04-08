@@ -140,7 +140,7 @@ for(token in tokens){
     scale_x_reverse(name = "F2 (Hz)",expand = c(0,0)) +
     scale_y_reverse(name = "F1 (Hz)",expand = c(0,0)) +
     coord_cartesian(xlim = c(x_max, F2*0.5), ylim = c(y_max, F1*0.5)) +
-    ggtitle(paste0("F0 for token ", token, ": ", round(f0,1), " Hz)")) +
+    ggtitle(paste0("f0 for ", token, ": ", round(f0,1), " Hz")) +
     theme_bw(base_size = 13)
 
 sweet_plot  

@@ -48,6 +48,19 @@ elsif Windows = 1
 	base_dir$ = base_dir$ + "\"
 endif
 
+# add archive folder
+
+createFolder: base_dir$ + "archive"
+
+pause
+
+# add trailing slash according to system
+if macintosh = 1
+   base_dir$ = base_dir$ + "/"
+elsif Windows = 1
+	base_dir$ = base_dir$ + "\"
+endif
+
 
 if recordingSource = 2
 	save_dir$ = snd_dir$ + formatted_dt$ + "/"

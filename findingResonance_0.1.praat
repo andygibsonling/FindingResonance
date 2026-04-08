@@ -52,7 +52,6 @@ endif
 
 createFolder: base_dir$ + "archive"
 
-pause
 
 # add trailing slash according to system
 if macintosh = 1

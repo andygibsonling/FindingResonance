@@ -32,7 +32,7 @@ form Settings
 	button: "recordNew"
 	button: "openFile"
 	comment: "Drag the folder where the scripts are to this field:"
-	text base_dir /AddPathToYour_"FindingResonance_Download"Folder
+	text base_dir /Users/andrewgibson/Documents/GitHub/FindingResonance
 	text snd_dir /AddPathToWavFiles_ifUsingPrerecordedAudio
 
 endform
@@ -49,6 +49,8 @@ elsif Windows = 1
 endif
 
 # add archive folder
+
+### TO DEBUG: ADD IFs SO IT ONLY DOES THIS IF MISSING FINAL SLASH
 
 createFolder: base_dir$ + "archive"
 

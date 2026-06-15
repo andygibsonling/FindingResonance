@@ -250,6 +250,7 @@ for w from 1 to nsnd
 		if recordingSource = 2
 			minusObject: sndlist
 		endif
+		pause About to empty your Praat Objects window - PRESS STOP NOW if you have unsaved work! 
 		Remove
 
 		eachClip += 1
@@ -303,3 +304,6 @@ endproc
 
 
 # to do: error when using point not span, only on last time
+# to do: currently if you have a 'long' clip that is less than a second, then your selection gets
+# washed out by the process of choosing a clip that's a whole second long around the cursor then going midpoint. so could insert a warning that long clip should be >3s or so. Could also make clips shorter.
+# to do: kinda rude to empty people's praat objects window without permission!

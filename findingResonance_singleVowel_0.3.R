@@ -20,6 +20,8 @@ datestamp <- format(Sys.time(), "%Y%m%d_%H%M")
 
 # --- Read CSV and set up output folder ---
 results_path <- readLines("latest_results.txt")
+ results_path <- "/Users/andrewgibson/Documents/GitHub/FormantHarmonicAlignment/LabPhon2026/tests/20260608_1204/testingTGscript_20260608_1204.csv"
+
 df <- read.csv(results_path)
 output_dir <- readLines("latest_run.txt")
 

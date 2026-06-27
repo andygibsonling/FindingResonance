@@ -10,7 +10,6 @@
 archive/
 *.png
 *.csv
-*.wav
 latest_results.txt
 latest_run.txt
 

@@ -74,7 +74,7 @@ for(token in tokens){
   closestFormant <- min(d1,d2,d3)
   
   x_max <- (F2 + BW2/2) * 1.1
-  if(show_f3){x_max <- F3 * 1.1}
+  if(show_f3_arrow && show_f3){x_max <- F3 * 1.1}
   y_max <- (F1 + BW1/2) * 1.1
   
   # --- Rebuild harmonic rectangles ---
@@ -197,6 +197,75 @@ sweet_plot
     
   ggsave(filename = file.path(output_dir, paste0(token, "_combined_", datestamp, ".png")),
          plot = combined_plot, width = 8, height = 7, dpi = 300)
+}
+
+# --- Additional combined vowel plot for recordings within one semitone ---
+# One harmonic lattice is meaningful only when the tokens have similar f0.
+# Keep the individual two-panel plots above regardless.
+vowel_points <- df %>%
+  group_by(token_id) %>%
+  summarise(f0 = first(f0), F1 = first(F1), F2 = first(F2),
+            BW1 = first(BW1), BW2 = first(BW2), .groups = "drop")
+
+if (nrow(vowel_points) >= 2 &&
+    all(is.finite(vowel_points$f0)) && all(vowel_points$f0 > 0) &&
+    all(is.finite(as.matrix(vowel_points[, c("F1", "F2", "BW1", "BW2")]))) &&
+    1200 * log2(max(vowel_points$f0) / min(vowel_points$f0)) <= 100) {
+
+  shared_f0 <- median(vowel_points$f0)
+  rects_combined <- tibble()
+  for (k in 1:20) {
+    band <- cents_to_hz(shared_f0 * k, 25)
+    rects_combined <- bind_rows(
+      rects_combined,
+      tibble(xmin = F2_limits[2], xmax = F2_limits[1],
+             ymin = band[1], ymax = band[2], axis = "F1", k = k),
+      tibble(xmin = band[1], xmax = band[2],
+             ymin = F1_limits[1], ymax = F1_limits[2], axis = "F2", k = k)
+    )
+  }
+
+  combined_vowel_plot <- ggplot() +
+    geom_rect(data = rects_combined,
+              aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+              fill = "green", alpha = 0.15) +
+    geom_rect(data = vowel_points,
+              aes(xmin = F2 - BW2/2, xmax = F2 + BW2/2,
+                  ymin = F1 - BW1/2, ymax = F1 + BW1/2),
+              fill = "black", alpha = 0.3) +
+    geom_text(data = vowel_points,
+              aes(x = F2, y = F1, label = token_id), size = 3) +
+    geom_text(data = rects_combined %>% filter(axis == "F1"),
+              aes(x = min(vowel_points$F2) * 0.85,
+                  y = (ymin + ymax)/2, label = paste0("H", k)),
+              colour = "darkblue", hjust = 0, size = 3.5) +
+    geom_text(data = rects_combined %>% filter(axis == "F2"),
+              aes(x = (xmin + xmax)/2,
+                  y = min(vowel_points$F1) * 0.85, label = paste0("H", k)),
+              colour = "darkgrey", size = 3.5) +
+    scale_x_reverse(name = "F2 (Hz)", expand = c(0, 0)) +
+    scale_y_reverse(name = "F1 (Hz)", expand = c(0, 0)) +
+    coord_cartesian(
+      xlim = c(max(vowel_points$F2 + vowel_points$BW2/2) * 1.1,
+               min(vowel_points$F2) * 0.5),
+      ylim = c(max(vowel_points$F1 + vowel_points$BW1/2) * 1.1,
+               min(vowel_points$F1) * 0.5)
+    ) +
+    labs(title = paste0("Combined vowels (median f0: ",
+                        round(shared_f0, 1), " Hz)"),
+         caption = paste(
+           "Grey rectangles = estimated F1/F2 bandwidths; green bands = harmonics ±25 cents",
+           "at the median f0. LPC formant estimates may be attracted towards harmonics.",
+           sep = "\n")) +
+    theme_bw(base_size = 13) +
+    theme(plot.caption = element_text(size = 8, hjust = 0, colour = "grey40"))
+
+  ggsave(filename = file.path(output_dir,
+                              paste0("combined_vowels_", datestamp, ".png")),
+         plot = combined_vowel_plot, width = 8, height = 7, dpi = 300)
+  cat("Combined vowel plot saved (all f0 values within 100 cents).\n")
+} else {
+  cat("Combined vowel plot skipped: need at least two tokens with f0 values within 100 cents (and valid formant measures).\n")
 }
 
 cat("\nAnalysis complete!\n",

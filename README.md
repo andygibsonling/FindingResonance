@@ -21,7 +21,7 @@ You'll need [Praat](https://www.fon.hum.uva.nl/praat/) and [R](https://cran.r-pr
 5. **To use existing recordings:** choose `openFile` and set `snd_dir` to a folder containing `.wav` files.
 6. In the sound editor, select the vowel portion you want analysed. Enter a vowel label and choose **selectAnotherChunk** or **lastChunkForThisSoundfile**. Repeat as needed.
 7. The Praat script saves measurements (CSV), audio clips, and spectra in a timestamped output folder. For new recordings, look inside `archive/`.
-8. Open `findingResonance_singleVowel.R` in RStudio. Install the required packages once using `install.packages(c("tidyverse", "patchwork", "rstudioapi"))`, then run the script to generate PNG plots in the output folder.
+8. Open `findingResonance_singleVowel.R` in RStudio. Install the required packages once using `install.packages(c("tidyverse", "patchwork", "rstudioapi"))` (in RStudio you can also click the 'install' button near the top of the interface), then run the script to generate PNG plots in the output folder.
 
 **Before running R:** remove the hard-coded `results_path <- "/Users/.../testingTGscript_....csv"` line in the current R script. Otherwise it overrides the path saved by Praat in `latest_results.txt`.
 

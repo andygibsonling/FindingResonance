@@ -18,6 +18,9 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 # get current time
 datestamp <- format(Sys.time(), "%Y%m%d_%H%M")
 
+# assume user doesn't want an arrow to F3 in the cases where it's near a harmonic 
+show_f3_arrow <- FALSE
+
 # --- Read CSV and set up output folder ---
 results_path <- readLines("latest_results.txt")
 
@@ -147,7 +150,8 @@ for(token in tokens){
 sweet_plot  
   
   # If F3 is closest, Add arrow from F2 to F3 on F2 axis
-  if(show_f3){sweet_plot <- sweet_plot +    
+  if(show_f3_arrow && show_f3){
+    sweet_plot <- sweet_plot +    
     geom_segment(aes(x = F2 + 100, y = F1, xend = F3, yend = F1), 
                  arrow = arrow(length = unit(0.2, "cm")), colour = "purple")
   }
@@ -176,8 +180,21 @@ sweet_plot
   )
   
   # --- Combine and save ---
-  combined_plot <- sweet_plot / prom_plot_short + plot_layout(heights = c(3,1))
+  combined_plot <- (sweet_plot / prom_plot_short) +
+    plot_layout(heights = c(3, 1)) +
+    plot_annotation(
+      caption = paste(
+        "TOP: Vowel label at estimated F1/F2 (grey rectangle = bandwidths); green bands = harmonics ±25 cents.",
+        "BOTTOM: Harmonic prominence = amplitude (dB) relative to the mean of neighbouring harmonics.",
+        "CAUTION: LPC formant estimates may be attracted towards harmonics, especially at high f0.",
+        sep = "\n"
+      ),
+      theme = theme(
+        plot.caption = element_text(size = 8, hjust = 0, colour = "grey40")
+      )
+    )
   
+    
   ggsave(filename = file.path(output_dir, paste0(token, "_combined_", datestamp, ".png")),
          plot = combined_plot, width = 8, height = 7, dpi = 300)
 }

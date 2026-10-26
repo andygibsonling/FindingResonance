@@ -155,11 +155,11 @@ sweet_plot
   
   # --- Prominence plot ---
   prom_plot <- ggplot(df_token, aes(x = Harmonic, y = TargetProm)) +
-    geom_line(aes(group = 1), size = 1, color = "#1b9e77") +
+    geom_line(aes(group = 1), linewidth = 1, color = "#1b9e77") +
     geom_point(size = 3, color = "#1b9e77") +
     geom_text(aes(label = ifelse(TargetProm == max(TargetProm), paste0("H", Harmonic), "")),
               vjust = 2, size = 3.5) +
-    scale_x_continuous(limits = c(2,13), breaks = c(2:13)) +
+    scale_x_continuous(limits = c(1,13), breaks = c(1:13)) +
     coord_cartesian(ylim = c(min(df_token$TargetProm)*1.2,
         max(df_token$TargetProm)*1.2)) +    
     labs(title = paste0("Harmonic Prominence – ", token),
@@ -182,3 +182,6 @@ sweet_plot
          plot = combined_plot, width = 8, height = 7, dpi = 300)
 }
 
+cat("\nAnalysis complete!\n",
+    "Plots saved in:\n", output_dir, "\n",
+    "Open the PNG files to view your results.\n")

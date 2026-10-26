@@ -220,9 +220,12 @@ if (nrow(pitch_groups) == 0) {
 for (pitch in pitch_groups$pitch_group) {
   group_points <- vowel_points %>% filter(pitch_group == pitch)
   shared_f0 <- median(group_points$f0)
+  min_f0 <- min(group_points$f0)
+  max_f0 <- max(group_points$f0)
   rects_combined <- tibble()
   for (k in 1:20) {
-    band <- cents_to_hz(shared_f0 * k, 25)
+    # Harmonic positions across the actual f0 range of this pitch group
+    band <- c(min_f0 * k, max_f0 * k)
     rects_combined <- bind_rows(
       rects_combined,
       tibble(xmin = F2_limits[2], xmax = F2_limits[1],
@@ -262,7 +265,7 @@ for (pitch in pitch_groups$pitch_group) {
                         "; median f0: ", round(shared_f0, 1), " Hz)"),
          caption = paste(
            "Vowel labels are positioned at estimated F1/F2; grey rectangles = bandwidths.",
-           "Green bands = harmonics ±25 cents at the group median f0.",
+           "Green bands = harmonic frequencies from the lowest to highest f0 in this group.",
            "CAUTION: LPC formant estimates may be attracted towards harmonics, especially at high f0.",
            sep = "\n")) +
     theme_bw(base_size = 13) +

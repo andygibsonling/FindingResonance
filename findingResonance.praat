@@ -138,10 +138,10 @@ for w from 1 to nsnd
 		View & Edit
 		editor: snd
 
-		# if doing many clips, likely you want the default button to be 'last chunk'
+		# if doing only one clip at a time, change default button to be 'last chunk' i.e. change the 1 to 2
 		beginPause: "select part to analyse then decide if this is the last clip"
 			sentence: "Vowel", vowel$
-		clicked = endPause: "selectAnotherChunk", "lastChunkForThisSoundfile", 2
+		clicked = endPause: "selectAnotherChunk", "lastChunkForThisSoundfile", 1
 
 		#pause about to measure 'vowel$' vowel
 
@@ -238,14 +238,16 @@ for w from 1 to nsnd
 		endfor
 		#ENDFOR EACH HARMONIC
 
-		select all
-		minusObject: snd
-		if recordingSource = 2
-			minusObject: sndlist
-		endif
-		pause WARNING: This will remove all Praat Objects except your current sound. 
-		pause Press Stop if you have unsaved work!
-		Remove
+#		select all
+#		minusObject: snd
+#		if recordingSource = 2
+#			minusObject: sndlist
+#		endif
+#		pause WARNING: This will remove all Praat Objects except your current sound. 
+#		pause Press Stop if you have unsaved work!
+#		Remove
+
+		selectObject: snd
 
 		eachClip += 1
 		

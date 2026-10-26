@@ -32,7 +32,7 @@ form Settings
 	button: "recordNew"
 	button: "openFile"
 	comment: "Drag the folder where the scripts are to this field:"
-	text base_dir /Users/andrewgibson/Documents/GitHub/FindingResonance
+	text base_dir /deleteThisText/then/DRAG/YOUR/FINDING/RESONANCE/FOLDER/HERE/
 	text snd_dir /AddPathToWavFiles_ifUsingPrerecordedAudio
 
 endform
@@ -41,27 +41,20 @@ endform
 @format_date_time
 #pause ding dong, it's currently 'formatted_dt$'  
 
-# add trailing slash according to system
+# Add trailing slash only if needed
 if macintosh = 1
-   base_dir$ = base_dir$ + "/"
+    if right$(base_dir$, 1) <> "/"
+        base_dir$ = base_dir$ + "/"
+    endif
 elsif Windows = 1
-	base_dir$ = base_dir$ + "\"
+    if right$(base_dir$, 1) <> "\"
+        base_dir$ = base_dir$ + "\"
+    endif
 endif
 
 # add archive folder
 
-### TO DEBUG: ADD IFs SO IT ONLY DOES THIS IF MISSING FINAL SLASH
-
 createFolder: base_dir$ + "archive"
-
-
-# add trailing slash according to system
-if macintosh = 1
-   base_dir$ = base_dir$ + "/"
-elsif Windows = 1
-	base_dir$ = base_dir$ + "\"
-endif
-
 
 if recordingSource = 2
 	save_dir$ = snd_dir$ + formatted_dt$ + "/"
@@ -104,7 +97,7 @@ writeFileLine: latest_file$, titleline$
 # if a new recording, record, then save the long wav
 if recordingSource = 1
 	nsnd = 1
-	pause Record your voice! (readme for help)!
+	pause Record your voice before pressing Continue! See readme file for help!
 	snd = selected()
 	selectObject: snd
 	save_path1$ = save_dir$ + formatted_dt$ + "_long.wav"
@@ -250,7 +243,8 @@ for w from 1 to nsnd
 		if recordingSource = 2
 			minusObject: sndlist
 		endif
-		pause About to empty your Praat Objects window - PRESS STOP NOW if you have unsaved work! 
+		pause WARNING: This will remove all Praat Objects except your current sound. 
+		pause Press Stop if you have unsaved work!
 		Remove
 
 		eachClip += 1
@@ -268,11 +262,13 @@ endfor
 ############## ENDFOR
 
 
-echo your csv is "input_csv": 'results_file$'
-
 # make a file with the path for R to read later
 pointer_file2$ = base_dir$ + "latest_results.txt"
 writeFileLine: pointer_file2$, results_file$
+
+appendInfoLine: "Analysis complete!"
+appendInfoLine: "Next: open findingResonance_singleVowel.R in RStudio and run it to generate the plots."
+appendInfoLine: "Results saved to: ", results_file$
 
 
 

@@ -23,12 +23,11 @@ You'll need [Praat](https://www.fon.hum.uva.nl/praat/) and [R](https://cran.r-pr
 7. The Praat script saves measurements (CSV), audio clips, and spectra in a timestamped output folder. For new recordings, look inside `archive/`.
 8. Open `findingResonance_singleVowel.R` in RStudio. Install the required packages once using `install.packages(c("tidyverse", "patchwork", "rstudioapi"))` (in RStudio you can also click the 'install' button near the top of the interface), then run the script to generate PNG plots in the output folder.
 
-**Before running R:** remove the hard-coded `results_path <- "/Users/.../testingTGscript_....csv"` line in the current R script. Otherwise it overrides the path saved by Praat in `latest_results.txt`.
-
 ## What the plots show
 
 - **Vowel plot:** estimated F1 and F2, their bandwidths, and the frequencies of harmonics at the recorded f0. When F3 is closer to a harmonic than F1 or F2, an arrow points towards F3.
 - **Harmonic prominence plot:** the amplitude of each harmonic relative to the average of its neighbouring harmonics, in dB. A larger value means that harmonic stands out more strongly.
+- **Combined vowel plot:** if some vowels are within a semitone of each other you get a combo plot with the harmonic grid based on their median f0
 
 ## Conference presentations and posters
 

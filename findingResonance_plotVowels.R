@@ -184,7 +184,7 @@ sweet_plot
     plot_layout(heights = c(3, 1)) +
     plot_annotation(
       caption = paste(
-        "TOP: Vowel label at estimated F1/F2 (grey rectangle = bandwidths); green bands = harmonics ±25 cents.",
+        "TOP: Vowel label is positioned at the estimated F1/F2; grey rectangle = bandwidths; green bands = harmonics ±25 cents.",
         "BOTTOM: Harmonic prominence = amplitude (dB) relative to the mean of neighbouring harmonics.",
         "CAUTION: LPC formant estimates may be attracted towards harmonics, especially at high f0.",
         sep = "\n"
@@ -195,24 +195,31 @@ sweet_plot
     )
   
     
-  ggsave(filename = file.path(output_dir, paste0(token, "_combined_", datestamp, ".png")),
+  ggsave(filename = file.path(output_dir, paste0(token, "_vowel_with_harmonic_prominence_", datestamp, ".png")),
          plot = combined_plot, width = 8, height = 7, dpi = 300)
 }
 
-# --- Additional combined vowel plot for recordings within one semitone ---
-# One harmonic lattice is meaningful only when the tokens have similar f0.
-# Keep the individual two-panel plots above regardless.
+# --- Combined vowel plots by nearest semitone (MIDI pitch) ---
+# Each token contributes one F1/F2 point; the individual two-panel plots
+# above are always saved. Pitch groups do not depend on recording order.
 vowel_points <- df %>%
   group_by(token_id) %>%
   summarise(f0 = first(f0), F1 = first(F1), F2 = first(F2),
-            BW1 = first(BW1), BW2 = first(BW2), .groups = "drop")
+            BW1 = first(BW1), BW2 = first(BW2), .groups = "drop") %>%
+  filter(is.finite(f0), f0 > 0,
+         is.finite(F1), is.finite(F2),
+         is.finite(BW1), is.finite(BW2)) %>%
+  mutate(pitch_group = as.integer(round(69 + 12 * log2(f0 / 440))))
 
-if (nrow(vowel_points) >= 2 &&
-    all(is.finite(vowel_points$f0)) && all(vowel_points$f0 > 0) &&
-    all(is.finite(as.matrix(vowel_points[, c("F1", "F2", "BW1", "BW2")]))) &&
-    1200 * log2(max(vowel_points$f0) / min(vowel_points$f0)) <= 100) {
+pitch_groups <- vowel_points %>% count(pitch_group) %>% filter(n >= 2)
 
-  shared_f0 <- median(vowel_points$f0)
+if (nrow(pitch_groups) == 0) {
+  cat("No combined vowel plots: no semitone group contains two or more tokens.\n")
+}
+
+for (pitch in pitch_groups$pitch_group) {
+  group_points <- vowel_points %>% filter(pitch_group == pitch)
+  shared_f0 <- median(group_points$f0)
   rects_combined <- tibble()
   for (k in 1:20) {
     band <- cents_to_hz(shared_f0 * k, 25)
@@ -229,43 +236,44 @@ if (nrow(vowel_points) >= 2 &&
     geom_rect(data = rects_combined,
               aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
               fill = "green", alpha = 0.15) +
-    geom_rect(data = vowel_points,
+    geom_rect(data = group_points,
               aes(xmin = F2 - BW2/2, xmax = F2 + BW2/2,
                   ymin = F1 - BW1/2, ymax = F1 + BW1/2),
               fill = "black", alpha = 0.3) +
-    geom_text(data = vowel_points,
+    geom_text(data = group_points,
               aes(x = F2, y = F1, label = token_id), size = 3) +
     geom_text(data = rects_combined %>% filter(axis == "F1"),
-              aes(x = min(vowel_points$F2) * 0.85,
+              aes(x = min(group_points$F2) * 0.85,
                   y = (ymin + ymax)/2, label = paste0("H", k)),
               colour = "darkblue", hjust = 0, size = 3.5) +
     geom_text(data = rects_combined %>% filter(axis == "F2"),
               aes(x = (xmin + xmax)/2,
-                  y = min(vowel_points$F1) * 0.85, label = paste0("H", k)),
+                  y = min(group_points$F1) * 0.85, label = paste0("H", k)),
               colour = "darkgrey", size = 3.5) +
     scale_x_reverse(name = "F2 (Hz)", expand = c(0, 0)) +
     scale_y_reverse(name = "F1 (Hz)", expand = c(0, 0)) +
     coord_cartesian(
-      xlim = c(max(vowel_points$F2 + vowel_points$BW2/2) * 1.1,
-               min(vowel_points$F2) * 0.5),
-      ylim = c(max(vowel_points$F1 + vowel_points$BW1/2) * 1.1,
-               min(vowel_points$F1) * 0.5)
+      xlim = c(max(group_points$F2 + group_points$BW2/2) * 1.1,
+               min(group_points$F2) * 0.5),
+      ylim = c(max(group_points$F1 + group_points$BW1/2) * 1.1,
+               min(group_points$F1) * 0.5)
     ) +
-    labs(title = paste0("Combined vowels (median f0: ",
-                        round(shared_f0, 1), " Hz)"),
+    labs(title = paste0("Combined vowel plot (MIDI note ", pitch,
+                        "; median f0: ", round(shared_f0, 1), " Hz)"),
          caption = paste(
-           "Grey rectangles = estimated F1/F2 bandwidths; green bands = harmonics ±25 cents",
-           "at the median f0. LPC formant estimates may be attracted towards harmonics.",
+           "Vowel labels are positioned at estimated F1/F2; grey rectangles = bandwidths.",
+           "Green bands = harmonics ±25 cents at the group median f0.",
+           "CAUTION: LPC formant estimates may be attracted towards harmonics, especially at high f0.",
            sep = "\n")) +
     theme_bw(base_size = 13) +
     theme(plot.caption = element_text(size = 8, hjust = 0, colour = "grey40"))
 
-  ggsave(filename = file.path(output_dir,
-                              paste0("combined_vowels_", datestamp, ".png")),
-         plot = combined_vowel_plot, width = 8, height = 7, dpi = 300)
-  cat("Combined vowel plot saved (all f0 values within 100 cents).\n")
-} else {
-  cat("Combined vowel plot skipped: need at least two tokens with f0 values within 100 cents (and valid formant measures).\n")
+  filename <- file.path(output_dir,
+                        paste0("combined_vowels_MIDI", pitch, "_", datestamp, ".png"))
+  ggsave(filename = filename, plot = combined_vowel_plot,
+         width = 8, height = 7, dpi = 300)
+  cat("Combined vowel plot saved: MIDI note ", pitch, " (",
+      nrow(group_points), " tokens; median f0 ", round(shared_f0, 1), " Hz).\n", sep = "")
 }
 
 cat("\nAnalysis complete!\n",
